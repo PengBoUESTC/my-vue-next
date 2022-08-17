@@ -9,6 +9,7 @@ const enum TrackType {
 const targetMap = new WeakMap<object, Map<string, Set<any>>>();
 
 function track(target: object, trackType: TrackType, key: string) {
+  if(!activeEffect) return
   if(!targetMap.has(target)) {
     targetMap.set(target, new Map())
   }
@@ -20,13 +21,19 @@ function track(target: object, trackType: TrackType, key: string) {
 
   const deps = depMap.get(key) as Set<any> 
 
-  deps.add(activeEffect)
+  deps.add(activeEffect);
+  activeEffect.deps.push(deps)
 }
 
 function triggerEvents(target: object, trackType: TrackType, key: string, value: any) {
   const deps = targetMap.get(target)?.get(key)
-
-  deps?.forEach((dep) => {
+  // 这里 拷贝 deps 防止 无限循环 
+  // 循环原因
+  /**
+   * 1: deps 中 effect 在 run 过程中会 在deps 中添加依赖
+   * 2: Set foreach 自身问题
+   */
+  new Set(deps || [])?.forEach((dep) => {
     dep.run()
   })
 }
@@ -49,7 +56,7 @@ export function reactive(target: any) {
        */
       const res = Reflect.get(target, key, receiver)
       // 数据获取 要进行依赖收集
-      track(res, TrackType.GET, key)
+      track(target, TrackType.GET, key)
       // 如果是 引用类型要再进行代理
       if(isObject(res)) {
         return reactive(res)

@@ -7,10 +7,18 @@
 
   <body>
     <script>
-      const { reactive } = VueReactivity
-      const a = { name: 100, user: { age: 100 }}
+      const { reactive, effect } = VueReactivity
+      const a = { name: 200, user: { age: 100 }}
       const proxyA = reactive(a)
-      console.log(proxyA, proxyA.user)
+      effect(() => {
+        console.log(proxyA.name)
+      })
+      setTimeout(() => {
+        proxyA.name = 300
+      }, 3000)
+      setTimeout(() => {
+        proxyA.user = {}
+      }, 1000)
     </script>
   </body>
 </html>
