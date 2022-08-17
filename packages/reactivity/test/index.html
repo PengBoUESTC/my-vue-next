@@ -7,7 +7,7 @@
 
   <body>
     <script>
-      const { reactive, effect } = VueReactivity
+      const { reactive, effect, computed } = VueReactivity
       const a = { name: 200, user: { age: 100 }}
       const proxyA = reactive(a)
       effect(() => {
@@ -17,6 +17,7 @@
           console.log('=scheduler')
         }
       })
+      // const res = computed(() => proxyA.name + 100)
       setTimeout(() => {
         proxyA.name = 300
       }, 3000)
