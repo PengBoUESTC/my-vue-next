@@ -1,4 +1,7 @@
 
+export type EffectScheduler = (...args: any[]) => any
+
+
 const NOOP = () => {}
 
 export function cleanupEffect(activeEffect: ReactiveEffect) {
@@ -12,13 +15,13 @@ export function cleanupEffect(activeEffect: ReactiveEffect) {
 }
 export class ReactiveEffect {
   public fn: Function = NOOP
-  public options: Record<string, any> = {}
+  public scheduler: EffectScheduler | null
   public parent: ReactiveEffect | undefined = undefined
   public active: boolean = true
   public deps: Set<ReactiveEffect>[] = [] // 存储一份 数据的 依赖 用于依赖清除
-  constructor(fn: Function, options: Record<string, any>) {
+  constructor(fn: Function, scheduler: EffectScheduler | null) {
     this.fn = fn
-    this.options = options
+    this.scheduler = scheduler
   }
 
   // 函数调用
@@ -44,7 +47,7 @@ export let activeEffect: ReactiveEffect | undefined
 
 // 副作用
 export function effect(fn: Function, options: Record<string, any>) {
-
-  const reactiveEffect = new ReactiveEffect(fn, options)
+  const { scheduler } = options
+  const reactiveEffect = new ReactiveEffect(fn, scheduler)
   reactiveEffect.run()
 }

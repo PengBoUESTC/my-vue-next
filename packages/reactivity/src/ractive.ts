@@ -1,5 +1,5 @@
 import { isObject } from '@vue/shared';
-import { activeEffect } from './effect';
+import { activeEffect, ReactiveEffect } from './effect';
 
 const enum TrackType {
   GET = 'get',
@@ -33,8 +33,13 @@ function triggerEvents(target: object, trackType: TrackType, key: string, value:
    * 1: deps 中 effect 在 run 过程中会 在deps 中添加依赖
    * 2: Set foreach 自身问题
    */
-  new Set(deps || [])?.forEach((dep) => {
-    dep.run()
+  new Set(deps || [])?.forEach((effect: ReactiveEffect) => {
+    // 如果有调度器 指定调度器
+    if(effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   })
 }
 

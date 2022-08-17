@@ -12,6 +12,10 @@
       const proxyA = reactive(a)
       effect(() => {
         console.log(proxyA.name)
+      }, {
+        scheduler() {
+          console.log('=scheduler')
+        }
       })
       setTimeout(() => {
         proxyA.name = 300
